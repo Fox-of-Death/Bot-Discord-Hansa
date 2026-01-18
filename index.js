@@ -12,26 +12,8 @@ app.listen(port, () => {
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { REST, Routes } = require('discord.js');
 const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
 require('dotenv').config();
-
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
-
-(async () => {
-    try {
-        const commands = [];
-        
-        await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
-            { body: commands },
-        );
-        console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
-})();
-
 
 const client = new Client({
   intents: [
