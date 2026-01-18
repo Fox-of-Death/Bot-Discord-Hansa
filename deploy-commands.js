@@ -12,8 +12,6 @@ for (const file of commandFiles) {
     const command = require(filePath);
     if ('data' in command && 'execute' in command) {
         commands.push(command.data.toJSON());
-    } else {
-        console.warn(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
 }
 
