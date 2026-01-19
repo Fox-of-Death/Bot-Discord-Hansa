@@ -6,7 +6,7 @@ app.get('/', (req, res) => {
   res.send('Bot is online!');
 });
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, () => {
   console.log(`✅ Web Server is running on port ${port}`);
 });
 
