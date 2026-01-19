@@ -36,7 +36,7 @@ module.exports = {
             fetchReply: true
         });
 
-        const collector = response.createMessageComponentCollector({ time: 60000 });
+        const collector = response.createMessageComponentCollector({ time: 30000 });
 
         collector.on('collect', async i => {
             if (i.user.id !== player2.id) {
@@ -159,7 +159,6 @@ async function startGame(interaction, player1, player2) {
         await i.update({ embeds: [gameEmbed], components: makeBoard() });
     });
 
-    // ตรวจจับกรณีไม่มีคนเล่นนานเกิน 5 นาที
     collector.on('end', async (collected, reason) => {
         if (reason === 'time' && !isGameOver) {
             const timeoutEmbed = new EmbedBuilder()
