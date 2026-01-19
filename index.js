@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 require('dotenv').config();
 
+=======
+// ================== Web Server ==================
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -21,11 +25,25 @@ app.listen(port, () => {
   console.log(`✅ Web Server is running on port ${port}`);
 });
 
+<<<<<<< HEAD
+=======
+// ================== Discord Bot ==================
+require('dotenv').config();
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, GatewayIntentBits, Events, REST, Routes } = require('discord.js');
+
+if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
+  console.error('❌ กรุณาตั้งค่า DISCORD_TOKEN และ CLIENT_ID ใน .env');
+  process.exit(1);
+}
+
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.MessageContent, // ต้องเปิด intent นี้ใน Discord Dev Portal ด้วย
   ],
 });
 
@@ -33,9 +51,13 @@ client.commands = new Collection();
 const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
 
+// โหลดคำสั่ง
 if (fs.existsSync(commandsPath)) {
   const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+<<<<<<< HEAD
 
+=======
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
@@ -43,13 +65,20 @@ if (fs.existsSync(commandsPath)) {
     if (command.data && command.execute) {
       client.commands.set(command.data.name, command);
       commands.push(command.data.toJSON());
+<<<<<<< HEAD
+=======
+    } else {
+      console.warn(`⚠️ คำสั่ง ${file} โครงสร้างไม่ถูกต้อง`);
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
     }
   }
 }
 
+// Deploy Slash Commands
 const deployCommands = async () => {
   const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
+<<<<<<< HEAD
   await rest.put(
     Routes.applicationCommands(process.env.CLIENT_ID),
     { body: commands }
@@ -61,11 +90,27 @@ client.once(Events.ClientReady, async () => {
   await deployCommands();
 });
 
+=======
+  try {
+    console.log(`⏳ Deploying ${commands.length} slash commands...`);
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+    console.log('✅ Slash commands deployed!');
+  } catch (error) {
+    console.error('❌ Deploy Commands Error:', error);
+  }
+};
+
+// Interaction
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
+<<<<<<< HEAD
 
   try {
     await command.execute(interaction);
@@ -82,3 +127,28 @@ client.on(Events.InteractionCreate, async interaction => {
 client.on('error', console.error);
 
 client.login(process.env.DISCORD_TOKEN);
+=======
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({
+      content: '❌ เกิดข้อผิดพลาดในการรันคำสั่ง',
+      ephemeral: true,
+    });
+  }
+});
+
+// Ready
+client.once(Events.ClientReady, async () => {
+  console.log(`🚀 Logged in as ${client.user.tag}`);
+  await deployCommands();
+});
+
+// Error
+client.on('error', console.error);
+
+// Login
+client.login(process.env.DISCORD_TOKEN);
+>>>>>>> f24035cfd81e63bfdd01056cef649c9e66747283
