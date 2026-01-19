@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ComponentType, MessageFlags } = require('discord.js');
 
 function checkWinner(board) {
-    const lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-    for (const [a, b, c] of lines) if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (const [a,b,c] of lines) if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
     return board.includes(null) ? null : 'Draw';
 }
 
@@ -52,8 +52,8 @@ async function startGame(interaction, p1, p2) {
 
             const timer = setInterval(async () => {
                 sec--;
-                if (sec > 0) await msg.edit({ embeds: [embed.setDescription(`${text}\n\n🕒 ข้อความจะถูกลบใน ${sec} วินาที`)] }).catch(() => { });
-                else { clearInterval(timer); await msg.delete().catch(() => { }); await interaction.deleteReply().catch(() => { }); }
+                if (sec > 0) await msg.edit({ embeds: [embed.setDescription(`${text}\n\n🕒 ข้อความจะถูกลบใน ${sec} วินาที`)] }).catch(() => {});
+                else { clearInterval(timer); await msg.delete().catch(() => {}); await interaction.deleteReply().catch(() => {}); }
             }, 1000);
 
             return col.stop();
@@ -65,8 +65,16 @@ async function startGame(interaction, p1, p2) {
 
     col.on('end', async (_, r) => {
         if (r === 'time' && !ended) {
-            await msg.edit({ embeds: [new EmbedBuilder().setTitle('❌ หมดเวลาการเล่น').setDescription('เกมจะถูกลบใน 5 วินาที').setColor(0x808080)], components: render(true) }).catch(() => { });
-            setTimeout(async () => { await msg.delete().catch(() => { }); await interaction.deleteReply().catch(() => { }); }, 5000);
+            await msg.edit({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle('❌ หมดเวลาการเล่น')
+                        .setDescription('เกมจะถูกลบใน 5 วินาที')
+                        .setColor(0x808080)
+                ],
+                components: render(true)
+            }).catch(() => {});
+            setTimeout(async () => { await msg.delete().catch(() => {}); await interaction.deleteReply().catch(() => {}); }, 5000);
         }
     });
 }
@@ -74,13 +82,16 @@ async function startGame(interaction, p1, p2) {
 module.exports = {
     data: new SlashCommandBuilder().setName('tictactoe').setDescription('ท้าดวล XO Hansa พร้อมระบบลบข้อความอัตโนมัติ')
         .addUserOption(o => o.setName('opponent').setDescription('คนที่จะท้าดวล').setRequired(true)),
+
     async execute(interaction) {
         const p1 = interaction.user, p2 = interaction.options.getUser('opponent');
         if (p2.bot || p2.id === p1.id)
             return interaction.reply({ embeds: [new EmbedBuilder().setTitle('❌ ผิดพลาด').setDescription('ไม่สามารถท้าตัวเองหรือบอทได้').setColor(0xff0000)], flags: MessageFlags.Ephemeral });
 
-        const embed = new EmbedBuilder().setTitle('🎮 คำเชิญท้าดวล XO Hansa')
-            .setDescription(`**${p2}**, คุณถูกท้าดวลโดย **${p1.username}**\nคุณจะรับคำท้าหรือไม่?`).setColor(0xffa500);
+        const embed = new EmbedBuilder()
+            .setTitle('🎮 คำเชิญท้าดวล XO Hansa')
+            .setDescription(`**${p2}**, คุณถูกท้าดวลโดย **${p1.username}**\nคุณจะรับคำท้าหรือไม่?`)
+            .setColor(0xffa500);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('accept_game').setLabel('เล่น').setStyle(ButtonStyle.Success),
@@ -97,8 +108,19 @@ module.exports = {
         });
 
         col.on('end', (c, r) => {
-            if (r === 'time' && c.size === 0)
-                interaction.editReply({ embeds: [new EmbedBuilder().setTitle('⌛ หมดเวลา').setDescription('ไม่มีการตอบรับคำเชิญภายในเวลาที่กำหนด').setColor(0x808080)], components: [] }).catch(() => { });
+            if (r === 'time' && c.size === 0) {
+                const time = new Date().toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle('⌛ หมดเวลา')
+                            .setDescription('ไม่มีการตอบรับคำเชิญภายในเวลาที่กำหนด')
+                            .setFooter({ text: `หมดเวลาเมื่อ ${time}` })
+                            .setColor(0x808080)
+                    ],
+                    components: []
+                }).catch(() => {});
+            }
         });
     }
 };

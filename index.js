@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, Events, REST, Routes } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Events, REST, Routes, ActivityType} = require('discord.js');
 
 if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
   console.error('❌ กรุณาตั้งค่า DISCORD_TOKEN และ CLIENT_ID ใน .env');
@@ -58,6 +58,17 @@ const deployCommands = async () => {
 
 client.once(Events.ClientReady, async () => {
   console.log(`🚀 Logged in as ${client.user.tag}`);
+  
+  client.user.setPresence({
+    activities: [
+      {
+        name: '24/7',
+        type: ActivityType.Listening,
+      },
+    ],
+    status: 'online',
+  });
+
   await deployCommands();
 });
 
